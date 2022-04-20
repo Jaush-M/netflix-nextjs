@@ -3,11 +3,13 @@ import { BellIcon, SearchIcon } from '@heroicons/react/solid'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import useAuth from '../hooks/useAuth'
 
 interface HeaderProps {}
 
 const Header: React.FC<HeaderProps> = () => {
   const [isScrolling, setIsScrolling] = useState(false)
+  const { logout } = useAuth()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,8 +34,8 @@ const Header: React.FC<HeaderProps> = () => {
           <a className="flex cursor-pointer">
             <Image
               src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg"
-              height={28}
-              width={112}
+              height={27.02}
+              width={100}
               objectFit="contain"
             />
           </a>
@@ -52,16 +54,20 @@ const Header: React.FC<HeaderProps> = () => {
         <SearchIcon className="hidden h-6 w-6 sm:inline" />
         <p className="hidden lg:inline">Kids</p>
         <BellIcon className="h-6 w-6" />
-        <Link href="/account">
-          <a className="flex cursor-pointer">
-            <Image
-              src="https://rb.gy/g1pwyx"
-              width={32}
-              height={32}
-              className="rounded"
-            />
-          </a>
-        </Link>
+        {/* <Link href="/account"> */}
+        {/* className="flex cursor-pointer"> */}
+        <div className="flex cursor-pointer">
+          <Image
+            onClick={logout}
+            src="https://rb.gy/g1pwyx"
+            width={32}
+            height={32}
+            className="rounded"
+          />
+        </div>
+
+        {/* </a> */}
+        {/* </Link> */}
       </div>
     </header>
   )

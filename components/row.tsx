@@ -1,11 +1,11 @@
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/outline'
 import { useEffect, useRef, useState } from 'react'
-import { Movie, TrendingMovie } from '../interfaces/movie.interface'
+import { Movie } from '../interfaces/movie.interface'
 import Thumbnail from './thumbnail'
 
 interface RowProps {
   title: string
-  movies: Movie[] | TrendingMovie[]
+  movies: Movie[]
 }
 
 const Row: React.FC<RowProps> = ({ title, movies }) => {

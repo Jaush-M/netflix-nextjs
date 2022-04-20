@@ -1,19 +1,19 @@
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
+import { useState } from 'react'
+import { useRecoilValue } from 'recoil'
+import { modalState } from '../atoms/modalAtom'
 import Banner from '../components/banner'
 import Header from '../components/header'
+import Modal from '../components/modal'
 import Row from '../components/row'
-import {
-  GetMovies,
-  GetTrendingMovies,
-  Movie,
-  TrendingMovie,
-} from '../interfaces/movie.interface'
+import useAuth from '../hooks/useAuth'
+import { GetMovies, Movie } from '../interfaces/movie.interface'
 import requests from '../utils/requests'
 
 interface HomeProps {
   netflixOriginals: Movie[]
-  trendingNow: TrendingMovie[]
+  trendingNow: Movie[]
   topRated: Movie[]
   actionMovies: Movie[]
   comedyMovies: Movie[]
@@ -32,6 +32,12 @@ const Home: NextPage<HomeProps> = ({
   romanceMovies,
   documentaries,
 }) => {
+  const { loading } = useAuth()
+  const showModal = useRecoilValue(modalState)
+  // const [showModal, setShowModal] = useState(false)
+
+  if (loading) return null
+
   return (
     <div className="relative h-screen bg-gradient-to-b lg:h-[140vh]">
       <Head>
@@ -40,7 +46,6 @@ const Home: NextPage<HomeProps> = ({
       </Head>
 
       <Header />
-
       <main className="relative pl-4 pb-24 lg:space-y-24 lg:pl-16">
         <Banner movies={netflixOriginals} />
 
@@ -54,12 +59,10 @@ const Home: NextPage<HomeProps> = ({
           <Row title="Documentaries" movies={documentaries} />
         </section>
       </main>
-      {/* Modal */}
+      {showModal && <Modal />}
     </div>
   )
 }
-
-export default Home
 
 export const getServerSideProps: GetServerSideProps = async () => {
   const [
@@ -71,7 +74,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
     horrorMovies,
     romanceMovies,
     documentaries,
-  ] = await Promise.all<GetMovies | GetTrendingMovies>([
+  ] = await Promise.all<GetMovies>([
     fetch(requests.fetchNetflixOriginals).then((res) => res.json()),
     fetch(requests.fetchTrending).then((res) => res.json()),
     fetch(requests.fetchTopRated).then((res) => res.json()),
@@ -95,3 +98,5 @@ export const getServerSideProps: GetServerSideProps = async () => {
     },
   }
 }
+
+export default Home
