@@ -63,7 +63,7 @@ const Modal: React.FC<ModalProps> = () => {
   return (
     <MuiModal
       open={showModal}
-      className="fixed top-7 left-0 right-0 z-50 mx-auto w-full max-w-5xl overflow-hidden overflow-y-scroll rounded-md scrollbar-hide"
+      className="fixed !top-7 left-0 right-0 z-50 mx-auto w-full max-w-5xl overflow-hidden overflow-y-scroll rounded-md scrollbar-hide"
       onClose={handleClose}
     >
       <>
