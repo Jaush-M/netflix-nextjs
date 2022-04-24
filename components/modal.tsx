@@ -3,15 +3,28 @@ import {
   XIcon,
   ThumbUpIcon,
   VolumeOffIcon,
+  CheckIcon,
 } from '@heroicons/react/outline'
 import { VolumeUpIcon } from '@heroicons/react/solid'
 import MuiModal from '@mui/material/Modal'
+import {
+  collection,
+  deleteDoc,
+  doc,
+  DocumentData,
+  onSnapshot,
+  setDoc,
+} from 'firebase/firestore'
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
+import toast, { Toaster } from 'react-hot-toast'
 import { FaPlay } from 'react-icons/fa'
 import ReactPlayer from 'react-player/lazy'
 import { useRecoilState } from 'recoil'
 import { modalState, movieState } from '../atoms/modalAtom'
-import { Genre, MovieDto } from '../interfaces/movie.interface'
+import { db } from '../firebase'
+import useAuth from '../hooks/useAuth'
+import { Genre, Movie, MovieDto } from '../interfaces/movie.interface'
 
 interface ModalProps {}
 
@@ -20,7 +33,21 @@ const Modal: React.FC<ModalProps> = () => {
   const [movie, setMovie] = useRecoilState(movieState)
   const [trailer, setTrailer] = useState<string | null>(null)
   const [genres, setGenres] = useState<Genre[]>([])
-  const [muted, setMuted] = useState(true)
+  const [muted, setMuted] = useState(false)
+  const [playerError, setPlayerError] = useState(false)
+  const { user } = useAuth()
+  const [addedToList, setAddedToList] = useState(false)
+  const [myList, setMyList] = useState<DocumentData[] | Movie[]>([])
+
+  const toastStyle = {
+    background: 'white',
+    color: 'black',
+    fontWeight: 'bold',
+    fontSize: '16px',
+    padding: '15px',
+    borderRadius: '9999px',
+    maxWidth: '1000px',
+  }
 
   useEffect(() => {
     if (!movie) return
@@ -33,8 +60,6 @@ const Modal: React.FC<ModalProps> = () => {
           process.env.NEXT_PUBLIC_API_KEY
         }&language=en-US&append_to_response=videos`
       ).then((res) => res.json())
-
-      console.log(data)
 
       if (data) {
         const { videos, genres } = data
@@ -51,9 +76,56 @@ const Modal: React.FC<ModalProps> = () => {
         }
       }
     }
-
     fetchMovie()
-  }, [movie])
+  }, [showModal, movie, playerError])
+
+  // Find all the movies in the user's list
+  useEffect(() => {
+    if (user) {
+      return onSnapshot(
+        collection(db, 'customers', user.uid, 'myList'),
+        (snapshot) => setMyList(snapshot.docs)
+      )
+    }
+  }, [db, movie?.id])
+
+  // Check if the movie is already in the user's list
+  useEffect(() => {
+    setAddedToList(
+      myList.findIndex((item) => item.data().id === movie?.id) !== -1
+    )
+  }, [myList])
+
+  const handleList = async () => {
+    if (addedToList) {
+      await deleteDoc(
+        doc(db, 'customers', user!.uid, 'myList', movie?.id.toString()!)
+      )
+
+      toast(
+        `${
+          movie?.title || movie?.original_name
+        } has been removed from My List.`,
+        {
+          duration: 8000,
+          style: toastStyle,
+        }
+      )
+    } else {
+      await setDoc(
+        doc(db, 'customers', user!.uid, 'myList', movie?.id.toString()!),
+        { ...movie }
+      )
+
+      toast(
+        `${movie?.title || movie?.original_name} has been added to My List.`,
+        {
+          duration: 8000,
+          style: toastStyle,
+        }
+      )
+    }
+  }
 
   const handleClose = () => {
     setShowModal(false)
@@ -67,6 +139,7 @@ const Modal: React.FC<ModalProps> = () => {
       onClose={handleClose}
     >
       <>
+        <Toaster position="bottom-center" />
         <button
           className="modalButton absolute right-5 top-5 z-40 h-9 w-9 border-none bg-[#181818] hover:bg-[#181818]"
           onClick={handleClose}
@@ -83,7 +156,16 @@ const Modal: React.FC<ModalProps> = () => {
             style={{ position: 'absolute', top: '0', left: '0' }}
             playing
             muted={muted}
+            onReady={() => {
+              setPlayerError(false)
+            }}
+            onError={() => {
+              setPlayerError(true)
+            }}
           />
+          {playerError && (
+            <Image src="https://rb.gy/qqhbou" layout="fill" objectFit="cover" />
+          )}
           <div className="absolute bottom-10 flex w-full items-center justify-between px-10">
             <div className="flex space-x-2">
               <button className="flex items-center gap-x-2 rounded bg-white px-8 text-xl font-bold text-black transition hover:bg-[#e6e6e6]">
@@ -91,8 +173,12 @@ const Modal: React.FC<ModalProps> = () => {
                 Play
               </button>
 
-              <button className="modalButton">
-                <PlusIcon className="h-7 w-7" />
+              <button className="modalButton" onClick={handleList}>
+                {addedToList ? (
+                  <CheckIcon className="h-7 w-7" />
+                ) : (
+                  <PlusIcon className="h-7 w-7" />
+                )}
               </button>
 
               <button className="modalButton">

@@ -1,13 +1,16 @@
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
-import { useState } from 'react'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 import { useRecoilValue } from 'recoil'
-import { modalState } from '../atoms/modalAtom'
+import { modalState, movieState } from '../atoms/modalAtom'
 import Banner from '../components/banner'
 import Header from '../components/header'
 import Modal from '../components/modal'
 import Row from '../components/row'
 import useAuth from '../hooks/useAuth'
+import UseList from '../hooks/useList'
+import UseSubscription from '../hooks/useSubscription'
 import { GetMovies, Movie } from '../interfaces/movie.interface'
 import requests from '../utils/requests'
 
@@ -32,17 +35,25 @@ const Home: NextPage<HomeProps> = ({
   romanceMovies,
   documentaries,
 }) => {
-  const { loading } = useAuth()
+  const { loading, user } = useAuth()
   const showModal = useRecoilValue(modalState)
+  const subscription = UseSubscription(user)
+  const router = useRouter()
+  const list = UseList(user?.uid)
 
-  if (loading) return null
+  useEffect(() => {
+    document.body.classList.toggle('!overflow-hidden', showModal)
+  }, [showModal])
+
+  if (loading || subscription === null) return null
+
+  if (!subscription) {
+    router.push('/signup/planform')
+    return null
+  }
 
   return (
-    <div
-      className={`relative h-screen bg-gradient-to-b lg:h-[140vh]${
-        showModal ? ' !h-screen overflow-hidden' : ''
-      }`}
-    >
+    <div className="relative h-screen bg-gradient-to-b lg:h-[140vh]">
       <Head>
         <title>Home - Netflix</title>
         <link rel="icon" href="/favicon.ico" />
@@ -55,9 +66,10 @@ const Home: NextPage<HomeProps> = ({
         <section className="md:space-y-24">
           <Row title="Trending Now" movies={trendingNow} />
           <Row title="Top Rated" movies={topRated} />
-          <Row title="Action Movies" movies={actionMovies} />
-          <Row title="Comedy Movies" movies={comedyMovies} />
-          <Row title="Horrow Movies" movies={horrorMovies} />
+          <Row title="Action Thrillers" movies={actionMovies} />
+          {list.length > 0 && <Row title="My List" movies={list} />}
+          <Row title="Comedies" movies={comedyMovies} />
+          <Row title="Horrow" movies={horrorMovies} />
           <Row title="Romance Movies" movies={romanceMovies} />
           <Row title="Documentaries" movies={documentaries} />
         </section>

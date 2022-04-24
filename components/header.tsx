@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import useAuth from '../hooks/useAuth'
+import BasicMenu from './basicMenu'
 
 interface HeaderProps {}
 
@@ -41,6 +42,7 @@ const Header: React.FC<HeaderProps> = () => {
           </a>
         </Link>
 
+        <BasicMenu />
         <ul className="hidden space-x-4 md:flex">
           <li className="headerLink active">Home</li>
           <li className="headerLink">TV Shows</li>
@@ -54,20 +56,16 @@ const Header: React.FC<HeaderProps> = () => {
         <SearchIcon className="hidden h-6 w-6 sm:inline" />
         <p className="hidden lg:inline">Kids</p>
         <BellIcon className="h-6 w-6" />
-        {/* <Link href="/account"> */}
-        {/* className="flex cursor-pointer"> */}
-        <div className="flex cursor-pointer">
-          <Image
-            onClick={logout}
-            src="https://rb.gy/g1pwyx"
-            width={32}
-            height={32}
-            className="rounded"
-          />
-        </div>
-
-        {/* </a> */}
-        {/* </Link> */}
+        <Link href="/account">
+          <div className="flex cursor-pointer">
+            <Image
+              src="https://rb.gy/g1pwyx"
+              width={32}
+              height={32}
+              className="rounded"
+            />
+          </div>
+        </Link>
       </div>
     </header>
   )

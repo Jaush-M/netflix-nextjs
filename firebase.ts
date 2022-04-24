@@ -6,15 +6,6 @@ import { getAuth } from 'firebase/auth'
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// const firebaseConfig = {
-//   apiKey: 'AIzaSyB2aKCEaHNixg1YO879dMJcLoIkt3P9O5E',
-//   authDomain: 'netflix-nextjs-48d3c.firebaseapp.com',
-//   projectId: 'netflix-nextjs-48d3c',
-//   storageBucket: 'netflix-nextjs-48d3c.appspot.com',
-//   messagingSenderId: '139253010739',
-//   appId: '1:139253010739:web:cc9ccaac60621f09582e46',
-// }
 const firebaseConfig = {
   apiKey: 'AIzaSyBuu0YHXOcgmqWLZl-fiMn6lG2wUhdPg8k',
   authDomain: 'next-firebase-stripe-39bf8.firebaseapp.com',
